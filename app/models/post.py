@@ -11,7 +11,7 @@ class Post():
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     query = """
-                    SELECT * FROM post
+                    SELECT * FROM entry
                     WHERE id = %s
                     """
                     cursor.execute(query, (id, ))
@@ -32,7 +32,7 @@ class Post():
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     query = """
-                    SELECT * FROM post
+                    SELECT * FROM entry
                     """
                     cursor.execute(query)
                     posts = cursor.fetchall()
@@ -50,12 +50,13 @@ class Post():
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     query = """
-                    INSERT INTO post (title, content, published, rating)
+                    INSERT INTO entry (title, content, published, rating)
                     VALUES (%s, %s, %s, %s)
                     RETURNING *;
                     """
+                    print(post)
                     
-                    cursor.execute(query, (post.title, post.content, post.published, post.rating))
+                    cursor.execute(query, (post['title'], post['content'], post['published'], post['rating']))
                     published_post = cursor.fetchone()
                     conn.commit()
                     if published_post is None:
@@ -74,12 +75,12 @@ class Post():
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     query = """
-                    UPDATE post
+                    UPDATE entry
                     SET title = %s, content = %s, published = %s, rating = %s
                     WHERE id = %s
                     RETURNING *;
                     """
-                    cursor.execute(query, (post.title, post.content, post.published, post.rating, id))
+                    cursor.execute(query, (post['title'], post['content'], post['published'], post['rating'], id))
                     updated_post = cursor.fetchone()
                     conn.commit()
                     
@@ -100,7 +101,7 @@ class Post():
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     query = """
-                    DELETE FROM post
+                    DELETE FROM entry
                     WHERE id = %s
                     """
                     cursor.execute(query, (id, ))
