@@ -14,7 +14,7 @@ class Post():
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     query = """
                     SELECT * FROM entry
-                    WHERE id = %s
+                    WHERE id = %s 
                     """
                     cursor.execute(query, (id, ))
                     post = cursor.fetchone()
@@ -56,12 +56,12 @@ class Post():
                     VALUES (%s, %s, %s, %s)
                     RETURNING *;
                     """
-                    
                     cursor.execute(query, (post['title'], post['content'], post['published'], post['rating']))
                     published_post = cursor.fetchone()
                     conn.commit()
+                                        
                     if published_post is None:
-                        raise HTTPException(status_code=404, detail="Error publishing the post.")
+                        raise HTTPException(status_code=500, detail="Failed to insert the post into the database.")
                     return published_post
                 
         except DatabaseError as e:
@@ -71,7 +71,7 @@ class Post():
             raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
         
     @classmethod
-    def update_post(cls, id: int, post: PostUpdate):
+    def update_post(cls, id: int, post: PostUpdate, current_user: User = Depends(get_current_user)):
         try: 
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
@@ -97,7 +97,7 @@ class Post():
             raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
     
     @classmethod
-    def delete_post(cls, id: int):
+    def delete_post(cls, id: int, current_user: User = Depends(get_current_user)):
         try: 
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:

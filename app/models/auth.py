@@ -40,7 +40,6 @@ class Auth():
     @classmethod
     def login(cls, user: OAuth2PasswordRequestForm = Depends()):
         try:
-            print(user)
             query = """
             SELECT id, email, username, created_at, password 
             FROM users 
