@@ -1,33 +1,27 @@
 from psycopg2 import DatabaseError
 from app.database import get_db_connection
 from fastapi import HTTPException
-from app.schemas.user import UserLogin, UserSignUp
+from app.schemas.user import User
 from psycopg2.extras import RealDictCursor
 
-class User():
+class UserModel():
     @classmethod
-    def user_signup(cls, user: UserSignUp):
+    def get_user(cls, id: int):
         try:
             query = """
-            INSERT INTO users (email, username, password)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (email) 
-            DO UPDATE SET 
-                username = EXCLUDED.username,  
-                password = EXCLUDED.password   
-            RETURNING id, email, username, created_at, password;
+            SELECT id, email, username, created_at, password 
+            FROM users 
+            WHERE id = %s
             """
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                    cursor.execute(query, (user.email, user.username, user.password))
-                    registered_user = cursor.fetchone()
-                    conn.commit()
-                    if registered_user is None:
-                        raise HTTPException(status_code=404, detail="Error registering user.")
-                    registered_user_dict = dict(registered_user)  
-                    registered_user_dict.pop('password', None)  
-
-                    return registered_user
+                    cursor.execute(query, (id,))
+                    user = cursor.fetchone()
+                    
+                    if user is None:
+                        raise HTTPException(status_code=404, detail="User not found.")
+                    
+                    return User(**user)
                 
         except DatabaseError as e:
             raise HTTPException(status_code=500, detail=f"Database connection error: {e}")
@@ -36,21 +30,17 @@ class User():
             raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
     
     @classmethod
-    def user_login(cls, user: UserLogin):
-        try:
-            query = """
-            SELECT * FROM users 
-            WHERE username = %s AND password = %s
-            """
+    def get_users(cls, limit: int = 10):
+        try: 
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                    cursor.execute(query, (user.username, user.password))
-                    logged_in_user = cursor.fetchone()
-                    if logged_in_user is None:
-                        raise HTTPException(status_code=404, detail="User not found.")
-                    logged_in_user_dict = dict(logged_in_user)  
-                    logged_in_user_dict.pop('password', None)
-                    return logged_in_user
+                    query = """
+                    SELECT * FROM users
+                    LIMIT %s
+                    """
+                    cursor.execute(query, (limit,))
+                    users = cursor.fetchall()
+                    return users
                 
         except DatabaseError as e:
             raise HTTPException(status_code=500, detail=f"Database connection error: {e}")

@@ -54,7 +54,6 @@ class Post():
                     VALUES (%s, %s, %s, %s)
                     RETURNING *;
                     """
-                    print(post)
                     
                     cursor.execute(query, (post['title'], post['content'], post['published'], post['rating']))
                     published_post = cursor.fetchone()

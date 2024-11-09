@@ -1,19 +1,16 @@
-from fastapi import APIRouter, HTTPException
-from app.models.user import User
-from app.schemas.user import UserResponse, UserSignUp, UserLogin
+from fastapi import APIRouter
+from app.models.user import UserModel
+from app.schemas.user import User
 from typing import List
 
 router = APIRouter()
 
-# user sign up
-@router.post('/sign-up', response_model=UserResponse)
-async def sign_up(user: UserSignUp):
-    return User.user_signup(user)
+@router.get('/{id}', response_model=User)
+def get_user(id: int):
+    user = UserModel.get_user(id)
+    return user 
 
-# user login
-@router.post('/login', response_model=UserResponse)
-async def login(user: UserLogin):
-    print(User.user_login(user))
-
-    return User.user_login(user)
-
+@router.get('/', response_model=List[User])
+def get_users():
+    users = UserModel.get_users()
+    return users 
