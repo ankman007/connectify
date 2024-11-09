@@ -1,8 +1,10 @@
 from psycopg2 import DatabaseError
 from app.database import get_db_connection
 from psycopg2.extras import RealDictCursor
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from app.schemas.post import PostCreate, PostUpdate
+from app.schemas.user import User
+from app.utils.oauth2 import get_current_user
 
 class Post():
     @classmethod
@@ -45,7 +47,7 @@ class Post():
             raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
         
     @classmethod
-    def create_post(cls, post: PostCreate):
+    def create_post(cls, post: PostCreate, current_user: User = Depends(get_current_user)):
         try: 
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:

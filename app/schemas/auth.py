@@ -11,9 +11,12 @@ class Login(Auth):
 class SignUp(Auth):
     email: EmailStr
     
-class AuthResponse(BaseModel):
+class SignupResponse(BaseModel):
     id: int
     username: str
     email: EmailStr
     created_at: datetime 
 
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str

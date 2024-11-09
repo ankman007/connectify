@@ -1,18 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.models.auth import Auth
-from app.schemas.auth import AuthResponse, SignUp, Login
+from app.schemas.auth import SignUp, Login, LoginResponse, SignupResponse
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
 # user sign up
-@router.post('/sign-up', response_model=AuthResponse)
+@router.post('/sign-up', response_model=SignupResponse)
 async def sign_up(user: SignUp): 
-    print(Auth.sign_up(user))
     return Auth.sign_up(user)
 
 # user login
-@router.post('/login', response_model=AuthResponse)
-async def login(user: Login):
-    print(Auth.login(user))
-    return Auth.login(user)
+@router.post('/login', response_model=LoginResponse)
+async def login(user: OAuth2PasswordRequestForm = Depends(Auth.login)):
+    return user
 

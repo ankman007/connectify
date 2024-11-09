@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from app.models.post import Post
 from app.schemas.post import PostCreate, PostUpdate, PostResponse
 from typing import List
