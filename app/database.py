@@ -33,6 +33,8 @@ def create_tables(conn):
         published BOOLEAN DEFAULT TRUE,
         rating INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        user_id INT NOT NULL, 
+        CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
     );
     """
     create_users_table_query = """
